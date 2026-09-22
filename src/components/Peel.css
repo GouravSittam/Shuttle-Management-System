@@ -1,0 +1,73 @@
+/* Peel Sticker Component Styles */
+.peel-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+.peel-under-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.peel-fallback-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              clip-path 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: right center;
+  z-index: 2;
+}
+
+/* Fallback sticker peel interaction for browsers without experimental html-in-canvas */
+.peel-wrapper.peel-fallback-active:hover .peel-fallback-container {
+  transform: perspective(1200px) rotateY(-18deg) translateX(35px) scale(0.98);
+  box-shadow: -15px 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.peel-wrapper.peel-fallback-active[data-side="right"]:hover .peel-fallback-container {
+  transform-origin: left center;
+  transform: perspective(1200px) rotateY(18deg) translateX(-35px) scale(0.98);
+  box-shadow: 15px 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.peel-wrapper.peel-fallback-active[data-side="top"]:hover .peel-fallback-container {
+  transform-origin: center bottom;
+  transform: perspective(1200px) rotateX(-20deg) translateY(30px) scale(0.98);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.22);
+}
+
+.peel-wrapper.peel-fallback-active[data-side="bottom"]:hover .peel-fallback-container {
+  transform-origin: center top;
+  transform: perspective(1200px) rotateX(20deg) translateY(-30px) scale(0.98);
+  box-shadow: 0 -20px 30px rgba(0, 0, 0, 0.22);
+}
+
+/* Visual curl dog-ear indicator on the peeling edge */
+.peel-dogear-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(200, 200, 200, 0.2) 50%, transparent 50%);
+  border-bottom-right-radius: 6px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+[data-theme="dark"] .peel-dogear-hint {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(100, 116, 139, 0.2) 50%, transparent 50%);
+}
+
+.peel-wrapper:hover .peel-dogear-hint {
+  opacity: 0;
+  transform: scale(1.4);
+}

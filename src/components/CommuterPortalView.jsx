@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Bus, QrCode, History, CheckCircle, ArrowRight, Star, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Bus, QrCode, History, CheckCircle, ArrowRight, Star, ShieldCheck, RefreshCw, Lock, Sparkles } from 'lucide-react';
 import JellyRadio from './JellyRadio';
+import Peel from './Peel';
 
 const CAMPUS_STOPS = [
   'Main Gate',
@@ -226,85 +227,171 @@ export const CommuterPortalView = ({
             </form>
           </div>
 
-          {/* Digital QR e-Pass Card */}
-          <div className="card-section">
-            <div className="card-header-bar">
-              <h2 className="card-title">
-                <QrCode size={18} color="var(--brand-blue)" />
-                Digital QR Transit Pass
-              </h2>
-              <span className="status-badge waiting">Pre-Approved</span>
-            </div>
-
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-              {/* QR Code Graphic Box */}
-              <div
-                style={{
-                  width: '180px',
-                  height: '180px',
-                  background: '#ffffff',
-                  border: '2px dashed var(--brand-primary)',
-                  borderRadius: 'var(--radius-md)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '12px',
-                  boxShadow: 'var(--shadow-sm)',
-                  position: 'relative',
-                }}
-              >
-                <QrCode size={120} color="#0f172a" />
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
-                  PASS-{latestPass ? latestPass.id : '123123'}
-                </span>
-              </div>
-
-              <div style={{ marginTop: '16px' }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{studentName}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  ID: EMP-{studentId}
-                </div>
-              </div>
-
+          {/* Digital QR e-Pass Card with Canvas UI <Peel /> Sticker */}
+          <Peel
+            side="left"
+            mode="cursor"
+            reveal={260}
+            zone={200}
+            curl={280}
+            bow={70}
+            shade={0.28}
+            shine={1}
+            shineDistance={1000}
+            bulge={45}
+            perspective={1800}
+            smoothing={0.25}
+            under={
               <div
                 style={{
                   width: '100%',
-                  marginTop: '16px',
-                  padding: '12px',
-                  background: 'var(--bg-card-subtle)',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-light)',
-                  textAlign: 'left',
-                  fontSize: '0.8rem',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, #091e3a 0%, #1e1b4b 60%, #064e3b 100%)',
+                  color: '#ffffff',
+                  padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px',
+                  justifyContent: 'space-between',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '2px solid rgba(16, 185, 129, 0.4)',
+                  boxShadow: 'inset 0 0 50px rgba(16, 185, 129, 0.18)',
+                  boxSizing: 'border-box',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>From:</span>
-                  <strong>{fromStop}</strong>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399', fontSize: '0.8rem', fontWeight: 800 }}>
+                      <ShieldCheck size={18} />
+                      <span>OFFICIAL NFC TRANSIT CLEARANCE</span>
+                    </div>
+                    <span style={{ fontSize: '0.7rem', background: 'rgba(52, 211, 153, 0.25)', color: '#6ee7b7', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                      VERIFIED TOKEN
+                    </span>
+                  </div>
+
+                  <div style={{ marginTop: '20px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Cryptographic Anti-Counterfeit Hash
+                    </div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#a7f3d0', marginTop: '4px', wordBreak: 'break-all' }}>
+                      SHA256: 9e8a4c22b01f9948d3c1a702b6623e19
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.78rem', color: '#cbd5e1' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                      <span style={{ color: '#94a3b8' }}>Security Clearance:</span>
+                      <strong style={{ color: '#34d399' }}>Level 3 (Full Campus Transit Access)</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                      <span style={{ color: '#94a3b8' }}>NFC RFID Tag:</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', color: '#60a5fa' }}>0x7F9B-2C4D-LPU-AUTH</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                      <span style={{ color: '#94a3b8' }}>Kiosk Protocol:</span>
+                      <span>ISO-14443A High-Speed Gateway</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#94a3b8' }}>Authorized Commuter:</span>
+                      <strong>{studentName} (EMP-{studentId})</strong>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>To:</span>
-                  <strong>{toStop}</strong>
+
+                <div style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.25)', paddingTop: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Lock size={16} color="#34d399" />
+                  <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    Tamper-evident holographic security sticker. Move cursor away to re-seal sticker pass.
+                  </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Pickup:</span>
-                  <strong>{requestedTime}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Assigned Driver:</span>
-                  <strong>Steve Smith (4.5 ★)</strong>
+              </div>
+            }
+          >
+            <div className="card-section" style={{ margin: 0, height: '100%', boxSizing: 'border-box' }}>
+              <div className="card-header-bar">
+                <h2 className="card-title">
+                  <QrCode size={18} color="var(--brand-blue)" />
+                  Digital QR Transit Pass
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--brand-primary)', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}>
+                    <Sparkles size={12} />
+                    Peelable Sticker
+                  </span>
+                  <span className="status-badge waiting">Pre-Approved</span>
                 </div>
               </div>
 
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '14px' }}>
-                Present this QR code to the onboard scanner or security kiosk to automatically board the shuttle without manual check-in delays.
-              </p>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                {/* QR Code Graphic Box */}
+                <div
+                  style={{
+                    width: '180px',
+                    height: '180px',
+                    background: '#ffffff',
+                    border: '2px dashed var(--brand-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '12px',
+                    boxShadow: 'var(--shadow-sm)',
+                    position: 'relative',
+                  }}
+                >
+                  <QrCode size={120} color="#0f172a" />
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                    PASS-{latestPass ? latestPass.id : '123123'}
+                  </span>
+                </div>
+
+                <div style={{ marginTop: '16px' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{studentName}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    ID: EMP-{studentId}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    width: '100%',
+                    marginTop: '16px',
+                    padding: '12px',
+                    background: 'var(--bg-card-subtle)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-light)',
+                    textAlign: 'left',
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>From:</span>
+                    <strong>{fromStop}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>To:</span>
+                    <strong>{toStop}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Pickup:</span>
+                    <strong>{requestedTime}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Assigned Driver:</span>
+                    <strong>Steve Smith (4.5 ★)</strong>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '14px' }}>
+                  Move cursor toward the left edge to peel back the sticker and inspect the underlying NFC tamper-evident security token.
+                </p>
+              </div>
             </div>
-          </div>
+          </Peel>
         </div>
       ) : (
         /* Trip History Tracking (Section 3.I) */
