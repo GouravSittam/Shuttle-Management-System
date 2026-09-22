@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Route as RouteIcon, Plus, MapPin, Truck, User, CheckCircle2 } from 'lucide-react';
+import { Route as RouteIcon, Plus, MapPin, Truck, User, CheckCircle2, Navigation, Clock, Sparkles, ShieldCheck } from 'lucide-react';
+import AnimatedList from './AnimatedList';
 
 export const RouteManagerView = ({
   routes,
@@ -35,6 +36,21 @@ export const RouteManagerView = ({
     setCode('');
   };
 
+  const [selectedStopIndex, setSelectedStopIndex] = useState(1);
+
+  const CAMPUS_STOPS_CATALOG = [
+    'Stop 1: Main Gate - Academic Loop (Headway: 10m)',
+    'Stop 2: Central Library Express - Transfer Hub (Headway: 8m)',
+    'Stop 3: Engineering Block North - Lecture Drop (Headway: 12m)',
+    'Stop 4: Data Centre & Tech Park (Headway: 15m)',
+    'Stop 5: Hostel Block A - Residential Line (Headway: 10m)',
+    'Stop 6: Girls Hostel Quad - Security Escort (Headway: 10m)',
+    'Stop 7: Sports Complex & Indoor Stadium (Headway: 20m)',
+    'Stop 8: Central Food Court & Student Center (Headway: 12m)',
+    'Stop 9: Commuter Parking Lot B (Headway: 15m)',
+    'Stop 10: University Administration Block (Headway: 15m)',
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div className="card-header-bar" style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
@@ -56,6 +72,112 @@ export const RouteManagerView = ({
           <Plus size={16} />
           <span>Add New Route</span>
         </button>
+      </div>
+
+      {/* Interactive Campus Transit Stop & Headway Navigator with AnimatedList */}
+      <div className="card-section" style={{ margin: 0, padding: '24px' }}>
+        <div className="card-header-bar" style={{ marginBottom: '18px' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '6px' }}>
+              <Sparkles size={14} />
+              <span>React Bits Integration: AnimatedList</span>
+            </div>
+            <h3 className="card-title" style={{ fontSize: '1.05rem' }}>
+              <Navigation size={18} color="var(--brand-primary)" />
+              Interactive Campus Stop & Headway Navigator
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+              Browse all sequential transit waypoints with animated entrance, fade gradients, and keyboard arrow navigation.
+            </p>
+          </div>
+
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span>⌨️ Use <strong>↑</strong> / <strong>↓</strong> arrow keys or click to select</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1.3fr) minmax(280px, 1fr)', gap: '24px', alignItems: 'start' }}>
+          {/* AnimatedList Component */}
+          <div>
+            <AnimatedList
+              items={CAMPUS_STOPS_CATALOG}
+              initialSelectedIndex={selectedStopIndex}
+              onItemSelect={(item, index) => setSelectedStopIndex(index)}
+              showGradients={true}
+              enableArrowNavigation={true}
+              displayScrollbar={true}
+              className="w-full"
+            />
+          </div>
+
+          {/* Real-time Stop Telemetry & Connecting Line Details */}
+          <div
+            style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--brand-primary)', fontWeight: 800, letterSpacing: '0.05em' }}>
+                Active Waypoint Selected
+              </div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>
+                {CAMPUS_STOPS_CATALOG[selectedStopIndex]?.split('(')[0] || 'Stop Selected'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                Zone ID: #CP-STOP-{selectedStopIndex + 1}0 • Automated RFID Sensor
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Next Shuttle ETA</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--brand-primary)' }}>
+                  {Math.max(2, (selectedStopIndex * 3) % 11 + 2)} mins
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Shuttle UA3282</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-card)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Waiting Commuters</div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--brand-blue)' }}>
+                  {12 + (selectedStopIndex * 4) % 25} riders
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>Within capacity</div>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Connecting Campus Lines
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1d4ed8', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+                  Central Express (CCE-01)
+                </span>
+                <span style={{ fontSize: '0.75rem', background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+                  Hostel Loop (HRS-02)
+                </span>
+                {selectedStopIndex % 2 === 0 && (
+                  <span style={{ fontSize: '0.75rem', background: '#ede9fe', color: '#6d28d9', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+                    Night Owl (NOL-04)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+              <ShieldCheck size={14} color="#10b981" />
+              <span>ADA Compliant • CCTV Monitored • Smart Transit Shelter</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Routes Grid */}
