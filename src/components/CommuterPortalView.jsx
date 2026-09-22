@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bus, QrCode, History, CheckCircle, ArrowRight, Star, ShieldCheck, RefreshCw } from 'lucide-react';
+import JellyRadio from './JellyRadio';
 
 const CAMPUS_STOPS = [
   'Main Gate',
@@ -87,33 +88,27 @@ export const CommuterPortalView = ({
           </p>
         </div>
 
-        {/* Tab switch */}
-        <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.1)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
-          <button
-            type="button"
-            className="nav-tab-btn"
-            style={{
-              background: activeSubTab === 'book' ? '#10b981' : 'transparent',
-              color: '#fff',
-            }}
-            onClick={() => setActiveSubTab('book')}
-          >
-            <Bus size={16} />
-            <span>Book Shuttle</span>
-          </button>
-
-          <button
-            type="button"
-            className="nav-tab-btn"
-            style={{
-              background: activeSubTab === 'history' ? '#10b981' : 'transparent',
-              color: '#fff',
-            }}
-            onClick={() => setActiveSubTab('history')}
-          >
-            <History size={16} />
-            <span>Trip History ({myTrips.length})</span>
-          </button>
+        {/* Tab switch with JellyRadio */}
+        <div style={{ background: 'rgba(255,255,255,0.08)', padding: '2px', borderRadius: 'var(--radius-full)' }}>
+          <JellyRadio
+            items={[
+              { value: 'book', label: 'Book Shuttle', icon: <Bus size={15} /> },
+              { value: 'history', label: `Trip History (${myTrips.length})`, icon: <History size={15} /> },
+            ]}
+            value={activeSubTab}
+            onChange={(val) => setActiveSubTab(val)}
+            size="md"
+            gap={6}
+            radius={20}
+            chipColor="rgba(255, 255, 255, 0.12)"
+            activeColor="#10b981"
+            textColor="#e2e8f0"
+            activeTextColor="#ffffff"
+            swell={0.16}
+            barge={5}
+            jelly={1}
+            bounce={0.25}
+          />
         </div>
       </div>
 

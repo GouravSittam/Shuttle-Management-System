@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Calendar, ChevronLeft, ChevronRight, Eye, Filter, ArrowUpDown } from 'lucide-react';
+import JellyRadio from './JellyRadio';
 
 const STATUS_FILTERS = [
   'All',
@@ -75,43 +76,41 @@ export const BookingManagementTable = ({
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Filter Tabs with JellyRadio */}
       <div
         style={{
           display: 'flex',
-          gap: '8px',
-          padding: '12px 20px',
+          gap: '12px',
+          padding: '8px 20px',
           background: 'var(--bg-card-subtle)',
           borderBottom: '1px solid var(--border-light)',
           overflowX: 'auto',
           alignItems: 'center',
         }}
       >
-        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
           <Filter size={13} />
           STATUS:
         </span>
-        {STATUS_FILTERS.map((st) => (
-          <button
-            key={st}
-            type="button"
-            className={`nav-tab-btn ${statusFilter === st ? 'active' : ''}`}
-            style={{
-              padding: '4px 10px',
-              fontSize: '0.75rem',
-              borderRadius: 'var(--radius-full)',
-              background: statusFilter === st ? 'var(--brand-blue)' : 'var(--bg-card)',
-              color: statusFilter === st ? '#fff' : 'var(--text-secondary)',
-              border: '1px solid var(--border-light)',
-            }}
-            onClick={() => {
-              setStatusFilter(st);
-              setCurrentPage(1);
-            }}
-          >
-            {st}
-          </button>
-        ))}
+        <JellyRadio
+          items={STATUS_FILTERS}
+          value={statusFilter}
+          onChange={(val) => {
+            setStatusFilter(val);
+            setCurrentPage(1);
+          }}
+          size="sm"
+          gap={6}
+          radius={14}
+          chipColor="var(--bg-card)"
+          activeColor="var(--brand-blue)"
+          textColor="var(--text-secondary)"
+          activeTextColor="#ffffff"
+          swell={0.16}
+          barge={4}
+          jelly={1}
+          bounce={0.24}
+        />
       </div>
 
       {/* Table Wrapper */}

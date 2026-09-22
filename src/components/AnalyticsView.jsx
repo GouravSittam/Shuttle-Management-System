@@ -1,10 +1,19 @@
-import React from 'react';
-import { TrendingUp, Users, CheckCircle, Clock, Bus, Zap, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, Users, CheckCircle, Clock, Bus, Zap, ShieldAlert, Gauge, Sliders, Sparkles, Activity } from 'lucide-react';
+import CometDial from './CometDial';
+import JellyRadio from './JellyRadio';
 
 export const AnalyticsView = ({ analytics }) => {
+  const [reserveHeadroom, setReserveHeadroom] = useState(72);
+  const [lastDialDetail, setLastDialDetail] = useState(null);
+
   if (!analytics) return <div style={{ padding: '24px' }}>Loading analytics metrics...</div>;
 
   const maxVal = Math.max(...analytics.hourlyPeakDemand.map((d) => Math.max(d.demand, d.capacity)));
+
+  // Derived simulation metrics based on CometDial headroom
+  const requiredStandbyBuses = Math.ceil((reserveHeadroom / 100) * 4);
+  const simulatedQueueTime = Math.max(1.5, Number((analytics.avgWaitMinutes * (1 - (reserveHeadroom - 50) / 100)).toFixed(1)));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -59,6 +68,210 @@ export const AnalyticsView = ({ analytics }) => {
           </div>
           <div style={{ fontSize: '0.75rem', color: '#16a34a', marginTop: '4px', fontWeight: 600 }}>
             ↓ 1.2m reduction after schedule optimization
+          </div>
+        </div>
+      </div>
+
+      {/* React Bits <CometDial /> Telemetry & Dispatch Control */}
+      <div className="card-section" style={{ margin: 0, padding: '24px' }}>
+        <div className="card-header-bar" style={{ marginBottom: '20px' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '6px' }}>
+              <Sparkles size={14} />
+              <span>React Bits Integration: CometDial</span>
+            </div>
+            <h2 className="card-title">
+              <Gauge size={18} color="var(--brand-primary)" />
+              Real-time Transit Telemetry & Dynamic Headroom Control
+            </h2>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+              High-precision animated radial comet dials measuring punctuality, fleet capacity, and simulated headway response. Drag or flick the dials to test physics momentum.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'stretch' }}>
+          {/* Gauge 1: On-Time Arrival */}
+          <div
+            style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <CheckCircle size={16} color="#10b981" />
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                On-Time Transit Index
+              </span>
+            </div>
+
+            <CometDial
+              defaultValue={Math.round(analytics.onTimeArrivalPct)}
+              min={0}
+              max={100}
+              step={1}
+              unit="%"
+              label="On-Time Rate"
+              accent="#10b981"
+              ink="var(--text-primary)"
+              size={180}
+              sweep={280}
+              thickness={6}
+              speed={28}
+              tapBounce={0.2}
+              flickBounce={0.12}
+              momentum={1.1}
+              cometReach={160}
+              cometWidth={12}
+            />
+
+            <div style={{ marginTop: '16px', fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: '220px' }}>
+              Target SLA &gt;95.0%. Current campus route network operating within optimal window.
+            </div>
+          </div>
+
+          {/* Gauge 2: Fleet Utilization */}
+          <div
+            style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <Bus size={16} color="#8b5cf6" />
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Fleet Capacity Utilization
+              </span>
+            </div>
+
+            <CometDial
+              defaultValue={Math.round(analytics.fleetUtilizationPct)}
+              min={0}
+              max={100}
+              step={1}
+              unit="%"
+              label="Fleet Utilization"
+              accent="#8b5cf6"
+              ink="var(--text-primary)"
+              size={180}
+              sweep={280}
+              thickness={6}
+              speed={28}
+              tapBounce={0.2}
+              flickBounce={0.12}
+              momentum={1.1}
+              cometReach={160}
+              cometWidth={12}
+            />
+
+            <div style={{ marginTop: '16px', fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: '220px' }}>
+              6 of 8 total shuttle vans deployed across Central, Ring, and Research loops.
+            </div>
+          </div>
+
+          {/* Gauge 3: Interactive Headroom & Surge Throttle */}
+          <div
+            style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-sm)',
+              position: 'relative'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <Sliders size={16} color="#2563eb" />
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Dynamic Headroom Throttle
+              </span>
+              <span style={{ fontSize: '0.68rem', background: '#dbeafe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                Interactive
+              </span>
+            </div>
+
+            <CometDial
+              value={reserveHeadroom}
+              min={10}
+              max={100}
+              step={1}
+              unit="%"
+              label="Dynamic Headroom Throttle"
+              accent="#2563eb"
+              ink="var(--text-primary)"
+              size={180}
+              sweep={320}
+              thickness={7}
+              speed={32}
+              tapBounce={0.25}
+              flickBounce={0.15}
+              momentum={1.2}
+              cometReach={180}
+              cometWidth={13}
+              onChange={(val) => setReserveHeadroom(val)}
+              onChangeEnd={(val, detail) => setLastDialDetail(detail)}
+            />
+
+            {/* Quick Presets with JellyRadio */}
+            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'center' }}>
+              <JellyRadio
+                items={[
+                  { value: '35', label: '35% Off-Peak' },
+                  { value: '72', label: '72% Standard' },
+                  { value: '95', label: '95% Rush Surge' },
+                ]}
+                value={[35, 72, 95].includes(reserveHeadroom) ? String(reserveHeadroom) : undefined}
+                onChange={(val) => setReserveHeadroom(Number(val))}
+                size="sm"
+                gap={5}
+                radius={12}
+                chipColor="var(--bg-card)"
+                activeColor="#2563eb"
+                textColor="var(--text-secondary)"
+                activeTextColor="#ffffff"
+                swell={0.16}
+                barge={4}
+                jelly={1}
+                bounce={0.25}
+              />
+            </div>
+
+            {/* Simulation Feedback Strip */}
+            <div
+              style={{
+                marginTop: '14px',
+                width: '100%',
+                padding: '8px 12px',
+                background: 'var(--bg-hover)',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.74rem',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <span>Standby fleet: <strong>{requiredStandbyBuses} shuttles</strong></span>
+              <span>Sim. wait: <strong>{simulatedQueueTime}m</strong></span>
+            </div>
           </div>
         </div>
       </div>

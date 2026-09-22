@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bus, Moon, Sun, Code2, PlusCircle, Layers, TrendingUp, Route as RouteIcon, UserCheck } from 'lucide-react';
+import JellyRadio from './JellyRadio';
 
 export const Navbar = ({
   activeTab,
@@ -10,6 +11,13 @@ export const Navbar = ({
   onOpenComplexity,
   onOpenNewBooking,
 }) => {
+  const navItems = [
+    { value: 'management', label: 'Management', icon: <Layers size={14} /> },
+    { value: 'performance', label: 'Performance', icon: <TrendingUp size={14} /> },
+    { value: 'routes', label: 'Campus Routes', icon: <RouteIcon size={14} /> },
+    { value: 'commuter', label: 'Commuter Portal', icon: <UserCheck size={14} /> },
+  ];
+
   return (
     <header className="navbar">
       <div className="nav-brand-section">
@@ -24,43 +32,24 @@ export const Navbar = ({
           </div>
         </a>
 
-        {/* Center Navigation Tabs matching MoveInSync screenshot */}
-        <nav className="nav-tabs" aria-label="Main Navigation">
-          <button
-            type="button"
-            className={`nav-tab-btn ${activeTab === 'management' ? 'active tab-green' : ''}`}
-            onClick={() => setActiveTab('management')}
-          >
-            <Layers size={16} />
-            <span>Management</span>
-          </button>
-
-          <button
-            type="button"
-            className={`nav-tab-btn ${activeTab === 'performance' ? 'active' : ''}`}
-            onClick={() => setActiveTab('performance')}
-          >
-            <TrendingUp size={16} />
-            <span>Performance</span>
-          </button>
-
-          <button
-            type="button"
-            className={`nav-tab-btn ${activeTab === 'routes' ? 'active' : ''}`}
-            onClick={() => setActiveTab('routes')}
-          >
-            <RouteIcon size={16} />
-            <span>Campus Routes</span>
-          </button>
-
-          <button
-            type="button"
-            className={`nav-tab-btn tab-portal ${activeTab === 'commuter' ? 'active' : ''}`}
-            onClick={() => setActiveTab('commuter')}
-          >
-            <UserCheck size={16} />
-            <span>Student / Staff Portal</span>
-          </button>
+        {/* Center Navigation Tabs with JellyRadio spring physics */}
+        <nav className="nav-tabs" aria-label="Main Navigation" style={{ background: 'transparent', padding: 0 }}>
+          <JellyRadio
+            items={navItems}
+            value={activeTab}
+            onChange={(val) => setActiveTab(val)}
+            size="sm"
+            gap={6}
+            radius={18}
+            chipColor="var(--bg-hover)"
+            activeColor="var(--brand-primary)"
+            textColor="var(--text-secondary)"
+            activeTextColor="#ffffff"
+            swell={0.16}
+            barge={4}
+            jelly={1.1}
+            bounce={0.28}
+          />
         </nav>
       </div>
 
