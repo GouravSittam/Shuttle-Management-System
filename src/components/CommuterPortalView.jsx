@@ -1,69 +1,81 @@
 import React, { useState } from 'react';
-import { Bus, QrCode, History, CheckCircle, ArrowRight, Star, ShieldCheck, RefreshCw, Lock, Sparkles } from 'lucide-react';
+import { Bus, QrCode, History, CheckCircle, ArrowRight, Star, ShieldCheck, RefreshCw, Lock, Sparkles, Navigation, Clock, User, Ban } from 'lucide-react';
 import JellyRadio from './JellyRadio';
 import Peel from './Peel';
-
-const CAMPUS_STOPS = [
-  'Main Gate',
-  'Central Library',
-  'Engineering Block',
-  'Data Centre',
-  'Hostel Block A',
-  'Girls Hostel',
-  'Sports Complex',
-  'Food Court',
-  'Parking Lot B',
-  'Administration Block',
-];
+import { CAMPUS_STOPS } from '../utils/realTimeEngine';
 
 export const CommuterPortalView = ({
-  bookings,
+  bookings = [],
+  routes = [],
+  shuttles = [],
   onBookRide,
+  onCancelBooking,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState('book');
+  const [userRole, setUserRole] = useState('Student'); // Student or Staff
   const [studentName, setStudentName] = useState('Thompson');
   const [studentId, setStudentId] = useState('123123');
   const [fromStop, setFromStop] = useState(CAMPUS_STOPS[1]); // Central Library
   const [toStop, setToStop] = useState(CAMPUS_STOPS[3]);   // Data Centre
-  const [requestedTime, setRequestedTime] = useState('11:21');
+  const [requestedTime, setRequestedTime] = useState('11:35');
+  const [passengerNotes, setPassengerNotes] = useState('');
+  const [selectedRouteId, setSelectedRouteId] = useState('rt-1');
   const [latestPass, setLatestPass] = useState(null);
 
   // Filter my trips
-  const myTrips = bookings.filter(
-    (b) => b.employeeName.toLowerCase().includes(studentName.toLowerCase()) || b.employeeId.includes(studentId)
-  );
+  const myTrips = bookings.filter((b) => {
+    const nameMatch = (b.employeeName || '').toLowerCase().includes(studentName.trim().toLowerCase());
+    const idMatch = (b.employeeId || '').toLowerCase().includes(studentId.trim().toLowerCase());
+    return (nameMatch && studentName.trim().length > 1) || (idMatch && studentId.trim().length > 2);
+  });
+
+  // Active Ongoing or Waiting Trip
+  const activeTrip = myTrips.find((t) => t.status === 'On Going' || t.status === 'Waiting' || t.status === 'Accepted');
+
+  // Estimate next arriving shuttle for the chosen fromStop
+  const matchingShuttle = shuttles.find((s) => {
+    const route = routes.find((r) => r.id === s.routeId);
+    return route && route.stops && route.stops.includes(fromStop);
+  }) || shuttles[0];
 
   const handleBook = (e) => {
     e.preventDefault();
+    const newBookingId = String(Math.floor(Math.random() * 900000 + 100000));
+    const now = new Date();
+    const nowHours = String(now.getHours()).padStart(2, '0');
+    const nowMins = String(now.getMinutes()).padStart(2, '0');
+    const dropMins = String((now.getMinutes() + 14) % 60).padStart(2, '0');
+    const dropHours = String(now.getHours() + (now.getMinutes() + 14 >= 60 ? 1 : 0)).padStart(2, '0');
+
     const newBooking = {
-      employeeName: studentName,
-      employeeId: `EMP-${studentId}`,
+      id: newBookingId,
+      employeeName: studentName.trim() || 'Campus Commuter',
+      employeeId: userRole === 'Student' ? `STU-${studentId}` : `EMP-${studentId}`,
+      role: userRole,
       fromLocation: fromStop,
       toLocation: toStop,
-      requestedPickupTime: requestedTime,
-      plannedDropTime: '11:32',
+      requestedPickupTime: requestedTime || `${nowHours}:${nowMins}`,
+      plannedDropTime: `${dropHours}:${dropMins}`,
       status: 'Waiting',
-      vehicleNumber: 'NB-002-RF',
-      vehicleDetails: 'UA3282 White Bus | 12 Seater',
-      driverName: 'Steve Smith',
-      driverPhone: '+1-322-493-3292',
-      driverRating: 4.5,
+      vehicleNumber: matchingShuttle ? matchingShuttle.vehicleNumber : 'NB-002-RF',
+      vehicleDetails: matchingShuttle ? matchingShuttle.model : 'UA3282 White Bus | 12 Seater',
+      driverName: matchingShuttle ? matchingShuttle.driverName : 'Steve Smith',
+      driverPhone: matchingShuttle ? matchingShuttle.driverPhone : '+1-322-493-3292',
+      driverRating: matchingShuttle ? matchingShuttle.driverRating : 4.5,
       date: 'Dec 16, 2024',
       pickupTime: '-',
       actualDropTime: '-',
       delayMinutes: 0,
-      notes: 'Booked via Student Commuter Self-Service Portal',
+      notes: passengerNotes || `Booked via ${userRole} Self-Service Portal`,
     };
+
     onBookRide(newBooking);
-    setLatestPass({
-      ...newBooking,
-      id: String(Math.floor(Math.random() * 900000 + 100000)),
-    });
+    setLatestPass(newBooking);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Banner */}
+      {/* Banner with Role Badging */}
       <div
         style={{
           background: 'linear-gradient(135deg, #064e3b 0%, #0f172a 100%)',
@@ -81,11 +93,11 @@ export const CommuterPortalView = ({
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.2)', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700, color: '#6ee7b7', marginBottom: '8px' }}>
             <ShieldCheck size={14} />
-            Verified Campus Transit Pass
+            Verified Campus Transit Commuter Service
           </div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Student & Staff Commuter Portal</h1>
           <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '4px' }}>
-            Instant campus transit booking, digital QR e-Pass, and trip tracking history.
+            Instant campus transit booking, real-time shuttle radar, digital QR e-Pass, and trip tracking history.
           </p>
         </div>
 
@@ -113,6 +125,77 @@ export const CommuterPortalView = ({
         </div>
       </div>
 
+      {/* Active Live Ride Alert / Radar if Commuter has an active trip */}
+      {activeTrip && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.1) 100%)',
+            border: '2px solid rgba(16, 185, 129, 0.4)',
+            borderRadius: 'var(--radius-md)',
+            padding: '16px 22px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '14px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                background: '#10b981',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Navigation size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--brand-primary)', textTransform: 'uppercase' }}>
+                  ACTIVE RIDE #{activeTrip.id}
+                </span>
+                <span className={`status-badge ${activeTrip.status.toLowerCase().replace(/[\s-]/g, '')}`}>
+                  {activeTrip.status}
+                </span>
+              </div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '2px' }}>
+                {activeTrip.fromLocation} → {activeTrip.toLocation}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                Vehicle: <strong>{activeTrip.vehicleNumber}</strong> • Driver: <strong>{activeTrip.driverName}</strong> ({activeTrip.driverPhone})
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Arrival</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--brand-primary)', fontFamily: 'var(--font-mono)' }}>
+                ~3 Mins
+              </div>
+            </div>
+
+            {onCancelBooking && (activeTrip.status === 'Waiting' || activeTrip.status === 'Requested') && (
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ color: '#ef4444', padding: '6px 12px', fontSize: '0.8rem' }}
+                onClick={() => onCancelBooking(activeTrip.id)}
+              >
+                <Ban size={14} />
+                <span>Cancel Ride</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {activeSubTab === 'book' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(320px, 420px)', gap: '24px', alignItems: 'start' }}>
           {/* Booking Form Card */}
@@ -122,12 +205,48 @@ export const CommuterPortalView = ({
                 <Bus size={18} color="var(--brand-primary)" />
                 Schedule a Campus Ride
               </h2>
-              <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700 }}>
-                Next Shuttle in 4 mins
+              <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={12} />
+                Next Shuttle arriving in ~2 mins
               </span>
             </div>
 
             <form onSubmit={handleBook} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Persona Selector: Student or Staff */}
+              <div className="form-group">
+                <label>I am booking as:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <button
+                    type="button"
+                    className={`btn-secondary ${userRole === 'Student' ? 'active' : ''}`}
+                    onClick={() => setUserRole('Student')}
+                    style={{
+                      justifyContent: 'center',
+                      background: userRole === 'Student' ? 'rgba(16, 185, 129, 0.15)' : undefined,
+                      borderColor: userRole === 'Student' ? 'var(--brand-primary)' : undefined,
+                      color: userRole === 'Student' ? 'var(--brand-primary)' : undefined,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span>🎓 Student</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn-secondary ${userRole === 'Staff' ? 'active' : ''}`}
+                    onClick={() => setUserRole('Staff')}
+                    style={{
+                      justifyContent: 'center',
+                      background: userRole === 'Staff' ? 'rgba(59, 130, 246, 0.15)' : undefined,
+                      borderColor: userRole === 'Staff' ? 'var(--brand-blue)' : undefined,
+                      color: userRole === 'Staff' ? 'var(--brand-blue)' : undefined,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span>💼 Faculty / Staff</span>
+                  </button>
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="form-group">
                   <label>Full Name</label>
@@ -141,7 +260,7 @@ export const CommuterPortalView = ({
                 </div>
 
                 <div className="form-group">
-                  <label>Student / Staff ID</label>
+                  <label>{userRole === 'Student' ? 'Roll No / Registration ID' : 'Faculty / Staff ID'}</label>
                   <input
                     type="text"
                     required
@@ -191,6 +310,17 @@ export const CommuterPortalView = ({
                 />
               </div>
 
+              <div className="form-group">
+                <label>Notes / Luggage Details (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Near Front Gate, carrying sports equipment or lab kit"
+                  className="form-control"
+                  value={passengerNotes}
+                  onChange={(e) => setPassengerNotes(e.target.value)}
+                />
+              </div>
+
               {/* Transit preview summary */}
               <div
                 style={{
@@ -206,13 +336,19 @@ export const CommuterPortalView = ({
                 <div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Estimated Trip Duration</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--brand-primary)' }}>11 Minutes</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Express Shuttle Route CCE-01</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    Route: {matchingShuttle?.routeName || 'Campus Express'}
+                  </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Assigned Vehicle</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>NB-002-RF</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Capacity: 12-Seater</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                    {matchingShuttle ? matchingShuttle.vehicleNumber : 'NB-002-RF'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    Driver: {matchingShuttle ? matchingShuttle.driverName : 'Steve Smith'}
+                  </div>
                 </div>
               </div>
 
@@ -293,7 +429,7 @@ export const CommuterPortalView = ({
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: '#94a3b8' }}>Authorized Commuter:</span>
-                      <strong>{studentName} (EMP-{studentId})</strong>
+                      <strong>{studentName} ({userRole === 'Student' ? 'STU' : 'EMP'}-{studentId})</strong>
                     </div>
                   </div>
                 </div>
@@ -349,7 +485,7 @@ export const CommuterPortalView = ({
                 <div style={{ marginTop: '16px' }}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{studentName}</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    ID: EMP-{studentId}
+                    ID: {userRole === 'Student' ? 'STU' : 'EMP'}-{studentId} ({userRole})
                   </div>
                 </div>
 
@@ -382,7 +518,7 @@ export const CommuterPortalView = ({
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Assigned Driver:</span>
-                    <strong>Steve Smith (4.5 ★)</strong>
+                    <strong>{matchingShuttle ? matchingShuttle.driverName : 'Steve Smith'}</strong>
                   </div>
                 </div>
 
@@ -394,7 +530,7 @@ export const CommuterPortalView = ({
           </Peel>
         </div>
       ) : (
-        /* Trip History Tracking (Section 3.I) */
+        /* Trip History Tracking */
         <div className="card-section">
           <div className="card-header-bar">
             <h2 className="card-title">
@@ -425,7 +561,7 @@ export const CommuterPortalView = ({
                 {myTrips.length === 0 ? (
                   <tr>
                     <td colSpan={9} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                      No past trips found for {studentName} ({studentId}).
+                      No past trips found for {studentName} ({studentId}). Schedule a ride above to get started!
                     </td>
                   </tr>
                 ) : (
@@ -452,7 +588,7 @@ export const CommuterPortalView = ({
                       <td>{trip.requestedPickupTime}</td>
                       <td>{trip.actualDropTime || trip.plannedDropTime}</td>
                       <td>
-                        <span className={`status-badge ${trip.status.toLowerCase().replace(/[\s-]/g, '')}`}>
+                        <span className={`status-badge ${(trip.status || '').toLowerCase().replace(/[\s-]/g, '')}`}>
                           {trip.status}
                         </span>
                       </td>

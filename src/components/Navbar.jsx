@@ -1,5 +1,5 @@
-import React from 'react';
-import { Bus, Moon, Sun, Code2, PlusCircle, Layers, TrendingUp, Route as RouteIcon, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bus, Moon, Sun, Code2, PlusCircle, Layers, TrendingUp, Route as RouteIcon, UserCheck, Navigation, Clock, ShieldCheck, User, Menu, X } from 'lucide-react';
 import JellyRadio from './JellyRadio';
 
 export const Navbar = ({
@@ -10,91 +10,187 @@ export const Navbar = ({
   toggleTheme,
   onOpenComplexity,
   onOpenNewBooking,
+  simTime = '11:24:18',
+  isSimRunning = true,
+  currentRole = 'admin', // 'admin' or 'commuter'
+  onChangeRole,
 }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const navItems = [
-    { value: 'management', label: 'Management', icon: <Layers size={14} /> },
-    { value: 'performance', label: 'Performance', icon: <TrendingUp size={14} /> },
-    { value: 'routes', label: 'Campus Routes', icon: <RouteIcon size={14} /> },
-    { value: 'commuter', label: 'Commuter Portal', icon: <UserCheck size={14} /> },
+    { value: 'management', label: 'Management', icon: <Layers size={13} /> },
+    { value: 'radar', label: 'Live GPS Radar', icon: <Navigation size={13} /> },
+    { value: 'performance', label: 'Performance', icon: <TrendingUp size={13} /> },
+    { value: 'routes', label: 'Campus Routes', icon: <RouteIcon size={13} /> },
+    { value: 'commuter', label: 'Commuter Portal', icon: <UserCheck size={13} /> },
   ];
 
-  return (
-    <header className="navbar">
-      <div className="nav-brand-section">
-        <a href="#home" className="nav-logo" onClick={(e) => { e.preventDefault(); setActiveTab('management'); }}>
-          <div className="logo-badge">
-            <Bus size={20} />
-            <span>MoveInSync</span>
-          </div>
-          <div>
-            <div style={{ fontSize: '0.98rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Campus Shuttle</div>
-            <div className="logo-subtext">Transit Operations & Dispatch</div>
-          </div>
-        </a>
+  const handleTabChange = (val) => {
+    setActiveTab(val);
+    if (val === 'commuter' && onChangeRole) onChangeRole('commuter');
+    if (val === 'management' && onChangeRole) onChangeRole('admin');
+    setIsMobileMenuOpen(false);
+  };
 
-        {/* Center Navigation Tabs with JellyRadio spring physics */}
-        <nav className="nav-tabs" aria-label="Main Navigation" style={{ background: 'transparent', padding: 0 }}>
+  return (
+    <header className="navbar-container">
+      <div className="navbar">
+        {/* 1. Left Brand Section */}
+        <div className="nav-brand-section">
+          <a
+            href="#home"
+            className="nav-logo"
+            onClick={(e) => {
+              e.preventDefault();
+              handleTabChange('management');
+            }}
+          >
+            <div className="logo-badge">
+              <Bus size={18} />
+              <span className="logo-badge-text">MoveInSync</span>
+            </div>
+            <div className="logo-text-group">
+              <div className="logo-main-title">
+                <span>Campus Shuttle</span>
+                <span className="badge-pro">PRO</span>
+              </div>
+              <div className="logo-subtext">Transit Operations & Dispatch</div>
+            </div>
+          </a>
+        </div>
+
+        {/* 2. Center Tabs (Visible on Desktop >= 1024px) */}
+        <nav className="nav-center-desktop" aria-label="Main Navigation">
           <JellyRadio
             items={navItems}
             value={activeTab}
-            onChange={(val) => setActiveTab(val)}
+            onChange={handleTabChange}
             size="sm"
-            gap={6}
-            radius={18}
+            gap={4}
+            radius={16}
             chipColor="var(--bg-hover)"
             activeColor="var(--brand-primary)"
             textColor="var(--text-secondary)"
             activeTextColor="#ffffff"
-            swell={0.16}
-            barge={4}
-            jelly={1.1}
-            bounce={0.28}
+            swell={0.14}
+            barge={3}
+            jelly={1}
+            bounce={0.25}
           />
         </nav>
+
+        {/* 3. Right Action Toolbar */}
+        <div className="nav-actions">
+          {/* Live Clock Pill */}
+          <div className="nav-pill-clock" title="Campus Transit Synchronized Live Clock">
+            <span className="live-dot-green" />
+            <span className="clock-time">{simTime}</span>
+          </div>
+
+          {/* Backend Connection Status Badge */}
+          <div
+            className="badge-server-status"
+            title={
+              isBackendConnected
+                ? 'Connected to Java REST API at http://localhost:8085'
+                : 'Operating in local real-time mode with persistent storage'
+            }
+          >
+            <div className={`status-dot ${isBackendConnected ? 'online' : 'offline'}`} />
+            <span className="server-status-label">
+              {isBackendConnected ? 'API Live' : 'Local Live'}
+            </span>
+          </div>
+
+          {/* Persona Role Switcher */}
+          <button
+            type="button"
+            className="btn-secondary btn-role-pill"
+            onClick={() => {
+              if (activeTab === 'commuter') {
+                handleTabChange('management');
+              } else {
+                handleTabChange('commuter');
+              }
+            }}
+            title="Switch view between Admin/Dispatcher Mode and Student/Staff Commuter Mode"
+          >
+            {activeTab === 'commuter' ? (
+              <>
+                <ShieldCheck size={14} color="var(--brand-blue)" />
+                <span className="role-btn-text">Admin</span>
+              </>
+            ) : (
+              <>
+                <User size={14} color="var(--brand-primary)" />
+                <span className="role-btn-text">Commuter</span>
+              </>
+            )}
+          </button>
+
+          {/* Algorithmic Complexity Evaluation Modal Button */}
+          <button
+            type="button"
+            className="btn-icon"
+            title="View Algorithmic Complexity Analysis (LPU Evaluation Criteria)"
+            onClick={onOpenComplexity}
+          >
+            <Code2 size={17} />
+          </button>
+
+          {/* Theme Toggle Button */}
+          <button
+            type="button"
+            className="btn-icon"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            onClick={toggleTheme}
+          >
+            {theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}
+          </button>
+
+          {/* New Booking Primary Button */}
+          <button
+            type="button"
+            className="btn-primary btn-new-booking"
+            onClick={onOpenNewBooking}
+          >
+            <PlusCircle size={15} />
+            <span className="btn-booking-text">New Booking</span>
+          </button>
+
+          {/* Mobile Navigation Toggle Button */}
+          <button
+            type="button"
+            className="btn-icon mobile-menu-btn"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            title="Toggle Navigation Menu"
+            aria-label="Toggle Navigation Menu"
+          >
+            {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </div>
 
-      <div className="nav-actions">
-        {/* Backend Connectivity Status */}
-        <div
-          className="badge-server-status"
-          title={isBackendConnected ? 'Connected to Java REST API at http://localhost:8085' : 'Backend offline - operating in local caching mode'}
-        >
-          <div className={`status-dot ${isBackendConnected ? 'online' : 'offline'}`} />
-          <span style={{ color: 'var(--text-secondary)' }}>
-            {isBackendConnected ? 'Java 8 API Live' : 'Backend Disconnected'}
-          </span>
+      {/* Responsive Secondary Sub-Bar for Medium/Small Viewports (< 1080px) */}
+      <div className={`navbar-subbar ${isMobileMenuOpen ? 'mobile-expanded' : ''}`}>
+        <div className="navbar-subbar-inner">
+          <JellyRadio
+            items={navItems}
+            value={activeTab}
+            onChange={handleTabChange}
+            size="sm"
+            gap={4}
+            radius={14}
+            chipColor="var(--bg-hover)"
+            activeColor="var(--brand-primary)"
+            textColor="var(--text-secondary)"
+            activeTextColor="#ffffff"
+            swell={0.14}
+            barge={3}
+            jelly={1}
+            bounce={0.25}
+          />
         </div>
-
-        {/* Complexity Analysis Modal Button */}
-        <button
-          type="button"
-          className="btn-icon"
-          title="View Complexity Analysis & System Evaluation Criteria"
-          onClick={onOpenComplexity}
-        >
-          <Code2 size={18} />
-        </button>
-
-        {/* Theme Toggle */}
-        <button
-          type="button"
-          className="btn-icon"
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          onClick={toggleTheme}
-        >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
-
-        {/* Quick New Booking Button */}
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={onOpenNewBooking}
-          style={{ padding: '7px 14px', fontSize: '0.82rem' }}
-        >
-          <PlusCircle size={16} />
-          <span>New Booking</span>
-        </button>
       </div>
     </header>
   );
